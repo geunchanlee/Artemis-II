@@ -278,5 +278,5 @@ export function drawSpacecraft(
   ctx.fillStyle = 'rgba(150,230,255,0.95)'
   ctx.font = '12px "Space Mono", monospace'
   ctx.textAlign = 'left'
-  ctx.fillText('ARTEMIS II', sx + 9, sy - 4)
+  ctx.fillText('ORION', sx + 9, sy - 4)
 }
