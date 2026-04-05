@@ -53,9 +53,9 @@ export function drawBodies(
   const currentMoonR = MOON_R_PX * sizeRatio
   const earthOffset = 40 * sizeRatio
 
-  // 지구 (궤도와 겹치지 않게 오른쪽 오프셋 적용, y는 달과 동일)
+  // 지구 (궤도와 겹치지 않게 우상단으로 시각적 오프셋 적용)
   const ex = cx + earthOffset
-  const ey = cy
+  const ey = cy - earthOffset
   
   if (earthImg.complete && earthImg.naturalWidth > 0) {
     ctx.save()
