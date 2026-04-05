@@ -9,19 +9,23 @@ export const MISSION_END      = new Date('2026-04-11T01:00:00Z')
 
 /**
  * 현재 위치/속도 단일 포인트를 가져온다 (30초 폴링용)
+ * 달 위치도 Horizons에서 병렬로 가져와 정확한 거리를 계산한다.
  */
 export async function fetchEphemeris(at: Date): Promise<Ephemeris> {
   const stop = new Date(at.getTime() + 60_000)
-  const qs = buildQS({
+  const timeParams = {
     START_TIME: formatDate(at),
     STOP_TIME:  formatDate(stop),
     STEP_SIZE:  '1m',
     VEC_TABLE:  '2',
     CSV_FORMAT: 'YES',
     VEC_LABELS: 'NO',
-  })
-  const json = await horizonsGet(qs)
-  return parseFirstPoint(json.result, at)
+  }
+  const [scJson, moonJson] = await Promise.all([
+    horizonsGet(buildQS({ ...timeParams, COMMAND: ARTEMIS_II })),
+    horizonsGet(buildQS({ ...timeParams, COMMAND: '301' })),
+  ])
+  return parseFirstPoint(scJson.result, moonJson.result, at)
 }
 
 /**
@@ -135,29 +139,16 @@ export function getMoonAngle(tMs: number): number {
   return startAngle + (elapsed / msPerOrbit) * 2 * Math.PI
 }
 
-/** 
- * 달의 대략적인 위치를 ICRF(지구 중심) 좌표계에서 계산한다.
- * (단순화를 위해 원형 궤도로 가정하되, 실제 달의 궤도 요소를 사용하여 위상차를 보정할 수 있음)
- */
-function getApproxMoonPos(at: Date): { x: number; y: number; z: number } {
-  const MOON_DIST_KM = 384400
-  const angle = getMoonAngle(at.getTime())
-  
-  return {
-    x: Math.cos(angle) * MOON_DIST_KM,
-    y: Math.sin(angle) * MOON_DIST_KM,
-    z: 0 // 단순화를 위해 평면 궤도 가정
-  }
-}
-
-function parseFirstPoint(raw: string, at: Date): Ephemeris {
-  const rows = extractSOE(raw)
+function parseFirstPoint(rawSc: string, rawMoon: string, at: Date): Ephemeris {
+  const rows = extractSOE(rawSc)
   const vec = colsToVec(rows[0])
   if (!vec) throw new Error('Horizons: failed to parse first data row')
   const { x, y, z, vx, vy, vz } = vec
-  
-  const moonPos = getApproxMoonPos(at)
-  const distMoon = Math.hypot(x - moonPos.x, y - moonPos.y, z - moonPos.z)
+
+  const moonRows = extractSOE(rawMoon)
+  const moonVec = colsToVec(moonRows[0])
+  if (!moonVec) throw new Error('Horizons: failed to parse Moon position')
+  const distMoon = Math.hypot(x - moonVec.x, y - moonVec.y, z - moonVec.z)
   
   return {
     time: at,
