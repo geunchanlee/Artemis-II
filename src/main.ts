@@ -3,7 +3,7 @@ import { inject } from '@vercel/analytics'
 import { generateStars, drawStars } from './canvas/background'
 import { makeScene, updateMoonAngle, drawBodies, drawTraveledOrbit, drawSpacecraft } from './canvas/orbit'
 import { initGauges, updateGauges, setGaugeMax } from './dashboard/gauges'
-import { updateTelemetry } from './dashboard/telemetry'
+import { updateTelemetry, startTimeTicker } from './dashboard/telemetry'
 import { fetchEphemeris, fetchFullTrajectory, TRAJECTORY_START, MISSION_END, getMoonAngle } from './horizons'
 import type { Ephemeris, TrajectoryPoint } from './types'
 
@@ -250,6 +250,9 @@ loadFullTrajectory().then(() => {
   pollTelemetry()
   setInterval(pollTelemetry, 30_000)
 })
+
+// Mission Time / UTC 는 1초마다 실시간 갱신
+startTimeTicker()
 
 // ─── 렌더 루프 ───────────────────────────────────────────────────────────────
 let lastTime = 0

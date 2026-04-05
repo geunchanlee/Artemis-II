@@ -16,11 +16,11 @@ export function updateTelemetry(
   el.innerHTML = `
     <div class="telem-row">
       <span class="telem-label">MISSION TIME</span>
-      <span class="telem-value">${met}</span>
+      <span class="telem-value" id="telem-met">${met}</span>
     </div>
     <div class="telem-row">
       <span class="telem-label">UTC</span>
-      <span class="telem-value">${data.time.toUTCString().replace('GMT','UTC')}</span>
+      <span class="telem-value" id="telem-utc">${data.time.toUTCString().replace('GMT','UTC')}</span>
     </div>
     <div class="telem-row">
       <span class="telem-label">SPEED</span>
@@ -50,6 +50,16 @@ export function updateTelemetry(
       <span class="telem-value telem-small">${progress.toFixed(1)}%</span>
     </div>
   `
+}
+
+export function startTimeTicker(): void {
+  setInterval(() => {
+    const now = new Date()
+    const metEl = document.getElementById('telem-met')
+    const utcEl = document.getElementById('telem-utc')
+    if (metEl) metEl.textContent = missionElapsedTime(now)
+    if (utcEl) utcEl.textContent = now.toUTCString().replace('GMT', 'UTC')
+  }, 1000)
 }
 
 const LAUNCH = new Date('2026-04-01T22:35:12Z')
