@@ -1,7 +1,7 @@
 import './style.css'
 import { inject } from '@vercel/analytics'
 import { generateStars, drawStars } from './canvas/background'
-import { makeScene, updateMoonAngle, drawBodies, drawFullOrbit, drawTraveledOrbit, drawSpacecraft } from './canvas/orbit'
+import { makeScene, updateMoonAngle, drawBodies, drawTraveledOrbit, drawSpacecraft } from './canvas/orbit'
 import { initGauges, updateGauges, setGaugeMax } from './dashboard/gauges'
 import { updateTelemetry } from './dashboard/telemetry'
 import { fetchEphemeris, fetchFullTrajectory, TRAJECTORY_START, MISSION_END, getMoonAngle } from './horizons'
@@ -80,7 +80,7 @@ let ephemeris: Ephemeris | null = null
 let fullTrajectory: TrajectoryPoint[] = []
 
 /** 현재 시각 기준으로 분리한 지나간 궤적 */
-let traveledPoints: Array<{ x: number; y: number }> = []
+let traveledPoints: Array<{ x: number; y: number; d?: number; v?: number }> = []
 
 let traveledKm = 0
 let totalKm    = 0

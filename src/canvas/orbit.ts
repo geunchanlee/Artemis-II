@@ -32,7 +32,7 @@ export function makeScene(w: number, h: number): OrbitalScene {
   return { cx, cy, scale, moonAngle: 0 }
 }
 
-export function updateMoonAngle(scene: OrbitalScene, at: Date): void {
+export function updateMoonAngle(scene: OrbitalScene, _at: Date): void {
   // 지구-달 회전 좌표계(Rotating Frame)를 적용하여 달을 항상 지구 오른편(각도 0)에 고정
   scene.moonAngle = 0
 }
