@@ -33,7 +33,7 @@ app.innerHTML = `
       <div id="telemetry"></div>
     </div>
     <div class="sidebar-section" style="margin-top: 1rem; text-align: center; padding-bottom: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
-      <a href="https://www.nasa.gov/artemis/" target="_blank" rel="noopener noreferrer" style="color: #2a7de1; text-decoration: none; font-size: 0.7rem; letter-spacing: 1.5px; text-transform: uppercase; display: inline-flex; align-items: center; justify-content: center; gap: 6px; opacity: 0.8; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'; this.style.color='#9ad8f0'" onmouseout="this.style.opacity='0.8'; this.style.color='#2a7de1'">
+      <a href="https://www.nasa.gov/mission/artemis-ii/" target="_blank" rel="noopener noreferrer" style="color: #2a7de1; text-decoration: none; font-size: 0.7rem; letter-spacing: 1.5px; text-transform: uppercase; display: inline-flex; align-items: center; justify-content: center; gap: 6px; opacity: 0.8; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'; this.style.color='#9ad8f0'" onmouseout="this.style.opacity='0.8'; this.style.color='#2a7de1'">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
         Official Mission Page
       </a>
