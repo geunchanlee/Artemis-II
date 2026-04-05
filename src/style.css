@@ -162,6 +162,11 @@ body {
   box-shadow: 0 0 6px #ff6060;
 }
 
+#status-dot.complete {
+  background: #00f080;
+  box-shadow: 0 0 8px #00f080;
+}
+
 #status-dot.loading {
   background: #ffd060;
   box-shadow: 0 0 6px #ffd060;

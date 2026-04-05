@@ -176,6 +176,13 @@ async function loadFullTrajectory(): Promise<void> {
 // ─── 실시간 폴링 (30초마다) ──────────────────────────────────────────────────
 
 async function pollTelemetry(): Promise<void> {
+  // 미션 종료 여부 확인 (30초마다 1번씩만 체크하여 성능 부하 최소화)
+  if (Date.now() > MISSION_END.getTime()) {
+    statusDot.className = 'complete'
+    statusText.textContent = 'MISSION COMPLETE'
+    return // 더 이상 데이터를 가져오지 않음
+  }
+
   statusDot.className = 'loading'
   statusText.textContent = 'Fetching telemetry…'
   try {
