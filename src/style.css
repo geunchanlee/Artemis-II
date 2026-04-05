@@ -1,0 +1,174 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #000;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
+  height: 100dvh;
+}
+
+#app {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  grid-template-rows: 100dvh;
+  height: 100dvh;
+}
+
+/* ── Canvas ── */
+#canvas-wrap {
+  position: relative;
+  overflow: hidden;
+}
+
+#canvas-wrap canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+#canvas-wrap .canvas-title {
+  position: absolute;
+  top: 20px;
+  left: 24px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+}
+
+/* ── Sidebar ── */
+#sidebar {
+  background: rgba(255,255,255,0.03);
+  border-left: 1px solid rgba(255,255,255,0.07);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 20px 16px 24px;
+  gap: 24px;
+}
+
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sidebar-section-title {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: rgba(255,255,255,0.25);
+  text-transform: uppercase;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+/* ── Gauges ── */
+#gauges {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.gauge-wrap svg {
+  overflow: visible;
+}
+
+/* ── Telemetry ── */
+#telemetry {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.telem-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.telem-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.18em;
+  color: rgba(255,255,255,0.25);
+  text-transform: uppercase;
+}
+
+.telem-value {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: rgba(255,255,255,0.85);
+}
+
+.telem-highlight {
+  color: #64dcff;
+  font-size: 14px;
+}
+
+.telem-unit {
+  font-size: 9px;
+  color: rgba(255,255,255,0.4);
+}
+
+.telem-small {
+  font-size: 10px;
+  color: rgba(255,255,255,0.55);
+}
+
+.progress-bar-wrap {
+  height: 4px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 4px 0 2px;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #2a7de1, #64dcff);
+  border-radius: 2px;
+  transition: width 0.6s ease;
+}
+
+/* ── Status badge ── */
+#status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: rgba(255,255,255,0.35);
+}
+
+#status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #64dcff;
+  box-shadow: 0 0 6px #64dcff;
+  flex-shrink: 0;
+}
+
+#status-dot.error {
+  background: #ff6060;
+  box-shadow: 0 0 6px #ff6060;
+}
+
+#status-dot.loading {
+  background: #ffd060;
+  box-shadow: 0 0 6px #ffd060;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
