@@ -172,3 +172,36 @@ body {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.3; }
 }
+
+/* ── Mobile Optimization (Max 850px) ── */
+@media (max-width: 850px) {
+  #app {
+    grid-template-columns: 1fr;
+    grid-template-rows: 55vh auto; /* 캔버스가 상단 55%, 사이드바가 나머지 */
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  #sidebar {
+    border-left: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    height: auto;
+    overflow-y: visible;
+    padding-bottom: 60px; /* 하단 여유 공간 확보 */
+  }
+
+  .canvas-title {
+    font-size: 12px;
+    top: 12px;
+    left: 12px;
+    letter-spacing: 1px;
+  }
+
+  .telem-row {
+    padding: 8px 0;
+  }
+
+  .gauge-container {
+    padding: 12px;
+  }
+}
