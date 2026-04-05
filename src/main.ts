@@ -3,7 +3,7 @@ import { inject } from '@vercel/analytics'
 import { generateStars, drawStars } from './canvas/background'
 import { makeScene, updateMoonAngle, drawBodies, drawTraveledOrbit, drawSpacecraft } from './canvas/orbit'
 import { initGauges, updateGauges, setGaugeMax } from './dashboard/gauges'
-import { updateTelemetry, startTimeTicker } from './dashboard/telemetry'
+import { updateTelemetry, startTimeTicker, stopTimeTicker } from './dashboard/telemetry'
 import { fetchEphemeris, fetchFullTrajectory, TRAJECTORY_START, MISSION_END, getMoonAngle } from './horizons'
 import type { Ephemeris, TrajectoryPoint } from './types'
 
@@ -178,9 +178,10 @@ async function loadFullTrajectory(): Promise<void> {
 async function pollTelemetry(): Promise<void> {
   // 미션 종료 여부 확인 (30초마다 1번씩만 체크하여 성능 부하 최소화)
   if (Date.now() > MISSION_END.getTime()) {
+    stopTimeTicker()
     statusDot.className = 'complete'
     statusText.textContent = 'MISSION COMPLETE'
-    return // 더 이상 데이터를 가져오지 않음
+    return
   }
 
   statusDot.className = 'loading'
