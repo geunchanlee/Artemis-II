@@ -154,10 +154,10 @@ async function loadFullTrajectory(): Promise<void> {
   }
 
   // 예측 데이터(미래)까지 잘 불러왔다면 마지막 거리값이 전체 미션 거리가 됨
-  // 만약 과거 데이터만 불러왔다면(오류 폴백) 대략적인 아르테미스 2호 전체 미션 왕복 거리 1,050,000km로 고정
+  // 만약 과거 데이터만 불러왔다면(오류 폴백) 대략적인 아르테미스 2호 전체 미션 왕복 거리 1,100,000km로 고정
   const lastT = fullTrajectory[fullTrajectory.length - 1].t
   const isFullMission = (MISSION_END.getTime() - lastT) < 86400 * 1000 // 1일 이내 차이
-  totalKm = isFullMission ? cumDist : 1050000
+  totalKm = isFullMission ? cumDist : 1100000
 
   // 달의 위치를 고정하기 위해 지구-달 회전 좌표계로 변환 (Moon at Angle 0)
   fullTrajectory.forEach(pt => {
