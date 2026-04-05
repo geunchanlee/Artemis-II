@@ -132,7 +132,7 @@ export function drawBodies(
   ctx.fill()
 
   ctx.fillStyle = 'rgba(255,255,255,0.95)'
-  ctx.font = '10px "Space Mono", monospace'
+  ctx.font = '12px "Space Mono", monospace'
   ctx.textAlign = 'center'
   ctx.fillText('MOON', mx, my - currentMoonR - 6)
   ctx.fillText('EARTH', ex, ey - currentEarthR - 6)
@@ -276,7 +276,7 @@ export function drawSpacecraft(
   ctx.shadowBlur = 0
 
   ctx.fillStyle = 'rgba(150,230,255,0.95)'
-  ctx.font = '10px "Space Mono", monospace'
+  ctx.font = '12px "Space Mono", monospace'
   ctx.textAlign = 'left'
   ctx.fillText('ARTEMIS II', sx + 9, sy - 4)
 }

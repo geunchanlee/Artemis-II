@@ -51,11 +51,15 @@ NASA Horizons API (ssd.jpl.nasa.gov)
 - **Prod proxy:** Vercel Edge Function at `api/horizons.ts`
 - Response is JSON with CSV embedded in a `result` string; data rows are delimited by `$$SOE` / `$$EOE` markers
 
+### Coordinate System
+
+All trajectory points are stored in ICRF (Earth-centered inertial) coordinates from Horizons, then transformed into an **Earth-Moon rotating frame** (Moon fixed at angle 0 on the right) before rendering. This transform is applied once after `fetchFullTrajectory()` and again per `pollTelemetry()` call. `getMoonAngle(tMs)` computes the Moon's orbital phase; the inverse rotation `(-angle)` is applied to spacecraft X/Y. The `getApproxMoonPos()` function is used only for `distanceFromMoon` computation in `parseFirstPoint`, not for canvas positioning.
+
 ### Canvas Rendering
 
-Drawing order per frame: clear → stars (drift animation) → update moon angle → Earth + Moon bodies → full trajectory (white dashed) → traveled trajectory (blue gradient) → spacecraft dot + glow.
+Drawing order per frame: clear → stars (drift animation) → update moon angle → Earth + Moon bodies → traveled trajectory (blue gradient) → spacecraft dot + glow.
 
-Trajectory is split at current time: pre-traveled portion renders as gradient, future portion as white dashes. Scale adapts dynamically to viewport size.
+`drawFullOrbit` (white dashed full trajectory) exists in `orbit.ts` but is currently commented out in `main.ts`. Only the traveled portion (blue glow, 16-segment gradient) is rendered. Scale adapts dynamically to viewport size; Earth is offset slightly up-left so the trajectory arc is centered.
 
 ### Mission Constants
 
