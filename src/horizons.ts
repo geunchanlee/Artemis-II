@@ -2,28 +2,30 @@ import type { Ephemeris, TrajectoryPoint } from './types'
 
 const BASE = '/api/horizons'
 const ARTEMIS_II = '-1024'
+const MOON = '301'
 const CENTER = '500@399'
+
+const OUTPUT_PARAMS = {
+  VEC_TABLE:  '2',
+  CSV_FORMAT: 'YES',
+  VEC_LABELS: 'NO',
+} as const
 
 export const TRAJECTORY_START = new Date('2026-04-02T02:00:00Z')
 export const MISSION_END      = new Date('2026-04-11T01:00:00Z')
 
-/**
- * 현재 위치/속도 단일 포인트를 가져온다 (30초 폴링용)
- * 달 위치도 Horizons에서 병렬로 가져와 정확한 거리를 계산한다.
- */
+/** 현재 위치/속도 단일 포인트를 가져온다 (30초 폴링용) */
 export async function fetchEphemeris(at: Date): Promise<Ephemeris> {
   const stop = new Date(at.getTime() + 60_000)
   const timeParams = {
     START_TIME: formatDate(at),
     STOP_TIME:  formatDate(stop),
     STEP_SIZE:  '1m',
-    VEC_TABLE:  '2',
-    CSV_FORMAT: 'YES',
-    VEC_LABELS: 'NO',
+    ...OUTPUT_PARAMS,
   }
   const [scJson, moonJson] = await Promise.all([
     horizonsGet(buildQS({ ...timeParams, COMMAND: ARTEMIS_II })),
-    horizonsGet(buildQS({ ...timeParams, COMMAND: '301' })),
+    horizonsGet(buildQS({ ...timeParams, COMMAND: MOON })),
   ])
   return parseFirstPoint(scJson.result, moonJson.result, at)
 }
@@ -41,9 +43,7 @@ export async function fetchFullTrajectory(
     START_TIME: formatDate(from),
     STOP_TIME:  formatDate(to),
     STEP_SIZE:  `${stepMinutes}m`,
-    VEC_TABLE:  '2',
-    CSV_FORMAT: 'YES',
-    VEC_LABELS: 'NO',
+    ...OUTPUT_PARAMS,
   })
   const json = await horizonsGet(qs)
   return parseAllPoints(json.result)
@@ -132,22 +132,21 @@ function jdToMs(jd: number): number {
  * 특정 시점의 달의 공전 위상을 계산한다.
  */
 export function getMoonAngle(tMs: number): number {
-  // 2026-04-02 02:00 UTC (미션 시작점) 근처의 달의 위상을 대략적으로 설정 (약 185도)
   const startAngle = (185 * Math.PI) / 180
   const msPerOrbit = 27.32 * 86400 * 1000
   const elapsed = tMs - new Date('2026-04-02T02:00:00Z').getTime()
   return startAngle + (elapsed / msPerOrbit) * 2 * Math.PI
 }
 
-function parseFirstPoint(rawSc: string, rawMoon: string, at: Date): Ephemeris {
-  const rows = extractSOE(rawSc)
-  const vec = colsToVec(rows[0])
-  if (!vec) throw new Error('Horizons: failed to parse first data row')
-  const { x, y, z, vx, vy, vz } = vec
+function firstVec(raw: string, label: string) {
+  const vec = colsToVec(extractSOE(raw)[0])
+  if (!vec) throw new Error(`Horizons: failed to parse ${label}`)
+  return vec
+}
 
-  const moonRows = extractSOE(rawMoon)
-  const moonVec = colsToVec(moonRows[0])
-  if (!moonVec) throw new Error('Horizons: failed to parse Moon position')
+function parseFirstPoint(rawSc: string, rawMoon: string, at: Date): Ephemeris {
+  const { x, y, z, vx, vy, vz } = firstVec(rawSc, 'spacecraft position')
+  const moonVec = firstVec(rawMoon, 'Moon position')
   const distMoon = Math.hypot(x - moonVec.x, y - moonVec.y, z - moonVec.z)
   
   return {
