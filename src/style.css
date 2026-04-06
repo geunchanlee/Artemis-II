@@ -1,3 +1,10 @@
+@font-face {
+  font-family: 'ArtemisInter';
+  src: url('/Artemis_Inter_041621.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -35,11 +42,21 @@ body {
   position: absolute;
   top: 20px;
   left: 24px;
-  font-family: 'Space Mono', monospace;
   font-size: 11px;
   letter-spacing: 0.15em;
   color: rgba(255,255,255,0.35);
   text-transform: uppercase;
+}
+
+#canvas-wrap .canvas-title-mission {
+  font-family: 'ArtemisInter', sans-serif;
+  font-weight: 700;
+  color: rgba(255,255,255,0.85);
+}
+
+#canvas-wrap .canvas-title-sub {
+  font-family: 'Space Mono', monospace;
+  font-weight: 400;
 }
 
 /* ── Sidebar ── */
@@ -122,6 +139,7 @@ body {
   font-size: 10px;
   color: rgba(255,255,255,0.55);
 }
+
 
 .progress-bar-wrap {
   height: 4px;

@@ -139,9 +139,18 @@ export function updateGauges(values: {
         }
       })
 
-    d3.select(wrap).select('.gauge-value')
-      .text(cfg.decimals === 0
-        ? Math.round(raw).toLocaleString()
-        : raw.toFixed(cfg.decimals))
+    d3.select(wrap).select<SVGTextElement & { _prevVal?: number }>('.gauge-value')
+      .transition().duration(600).ease(d3.easeQuadOut)
+      .tween('text', function () {
+        const prev   = this._prevVal ?? raw
+        this._prevVal = raw
+        const interp = d3.interpolateNumber(prev, raw)
+        return (t2: number) => {
+          const v = interp(t2)
+          this.textContent = cfg.decimals === 0
+            ? Math.round(v).toLocaleString()
+            : v.toFixed(cfg.decimals)
+        }
+      })
   }
 }

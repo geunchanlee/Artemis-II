@@ -13,7 +13,7 @@ inject()
 const app = document.getElementById('app')!
 app.innerHTML = `
   <div id="canvas-wrap">
-    <span class="canvas-title">Artemis II · Earth–Moon Transit</span>
+    <span class="canvas-title"><span class="canvas-title-mission">Artemis II</span><span class="canvas-title-sub"> · Earth–Moon Transit</span></span>
     <canvas id="main-canvas"></canvas>
   </div>
   <aside id="sidebar">
