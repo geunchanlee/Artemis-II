@@ -183,68 +183,69 @@ export function drawTraveledOrbit(
   if (points.length < 2) return
   const { cx, cy, scale } = scene
 
-  function buildPath(pts: Array<{ x: number; y: number }>, i0: number, i1: number) {
+  const x0 = cx + points[0].x * scale
+  const y0 = cy - points[0].y * scale
+  const xN = cx + points[points.length - 1].x * scale
+  const yN = cy - points[points.length - 1].y * scale
+
+  function tracePath() {
     ctx.beginPath()
-    ctx.moveTo(cx + pts[i0].x * scale, cy - pts[i0].y * scale)
-    for (let i = i0 + 1; i <= i1; i++) {
-      ctx.lineTo(cx + pts[i].x * scale, cy - pts[i].y * scale)
+    ctx.moveTo(x0, y0)
+    for (let i = 1; i < points.length; i++) {
+      ctx.lineTo(cx + points[i].x * scale, cy - points[i].y * scale)
     }
   }
 
-  const GROUPS = 16
-  for (let g = 0; g < GROUPS; g++) {
-    const i0 = Math.floor((g / GROUPS) * (points.length - 1))
-    const i1 = Math.floor(((g + 1) / GROUPS) * (points.length - 1))
-    if (i0 >= i1) continue
+  ctx.lineJoin = 'round'
+  ctx.lineCap  = 'round'
 
-    const t = (g + 1) / GROUPS
+  // 레이어 1: 넓은 외곽 글로우
+  const g1 = ctx.createLinearGradient(x0, y0, xN, yN)
+  g1.addColorStop(0, 'rgba(30,120,255,0.08)')
+  g1.addColorStop(1, 'rgba(30,120,255,0.20)')
+  tracePath()
+  ctx.strokeStyle = g1
+  ctx.lineWidth   = 14
+  ctx.stroke()
 
-    // 레이어 1: 넓은 외곽 글로우
-    buildPath(points, i0, i1)
-    ctx.strokeStyle = `rgba(30,120,255,${(0.08 + t * 0.12).toFixed(2)})`
-    ctx.lineWidth = 8 + t * 6
-    ctx.lineJoin = 'round'
-    ctx.stroke()
+  // 레이어 2: 중간 글로우
+  const g2 = ctx.createLinearGradient(x0, y0, xN, yN)
+  g2.addColorStop(0, 'rgba(60,160,255,0.20)')
+  g2.addColorStop(1, 'rgba(60,160,255,0.50)')
+  tracePath()
+  ctx.strokeStyle = g2
+  ctx.lineWidth   = 6
+  ctx.stroke()
 
-    // 레이어 2: 중간 글로우
-    buildPath(points, i0, i1)
-    ctx.strokeStyle = `rgba(60,160,255,${(0.20 + t * 0.30).toFixed(2)})`
-    ctx.lineWidth = 3 + t * 3
-    ctx.lineJoin = 'round'
-    ctx.stroke()
-
-    // 레이어 3: 핵심 밝은 선
-    buildPath(points, i0, i1)
-    ctx.strokeStyle = `rgba(140,210,255,${(0.50 + t * 0.45).toFixed(2)})`
-    ctx.lineWidth = 1.0 + t * 1.5
-    ctx.lineJoin = 'round'
-    ctx.stroke()
-  }
+  // 레이어 3: 핵심 밝은 선
+  const g3 = ctx.createLinearGradient(x0, y0, xN, yN)
+  g3.addColorStop(0, 'rgba(140,210,255,0.50)')
+  g3.addColorStop(1, 'rgba(140,210,255,0.95)')
+  tracePath()
+  ctx.strokeStyle = g3
+  ctx.lineWidth   = 1.5
+  ctx.stroke()
 
   // 최근 구간: 우주선 직전 trailing glow
   if (points.length >= 4) {
     const tail = points.slice(-8)
 
-    // 외곽 글로우
     ctx.beginPath()
     ctx.moveTo(cx + tail[0].x * scale, cy - tail[0].y * scale)
     for (let i = 1; i < tail.length; i++) {
       ctx.lineTo(cx + tail[i].x * scale, cy - tail[i].y * scale)
     }
     ctx.strokeStyle = 'rgba(80,180,255,0.25)'
-    ctx.lineWidth = 14
-    ctx.lineJoin = 'round'
+    ctx.lineWidth   = 14
     ctx.stroke()
 
-    // 밝은 핵심 선
     ctx.beginPath()
     ctx.moveTo(cx + tail[0].x * scale, cy - tail[0].y * scale)
     for (let i = 1; i < tail.length; i++) {
       ctx.lineTo(cx + tail[i].x * scale, cy - tail[i].y * scale)
     }
     ctx.strokeStyle = 'rgba(180,230,255,0.95)'
-    ctx.lineWidth = 2.5
-    ctx.lineJoin = 'round'
+    ctx.lineWidth   = 2.5
     ctx.stroke()
   }
 }
