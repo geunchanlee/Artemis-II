@@ -34,25 +34,26 @@ interface AnimEl extends HTMLElement {
 function countAnimate(id: string, newVal: number, fmt: (v: number) => string): void {
   const el = document.getElementById(id) as AnimEl | null
   if (!el) return
+  const node: AnimEl = el  // non-null ref for closure
 
-  const prevVal = el._prevVal ?? newVal
-  el._prevVal = newVal
+  const prevVal = node._prevVal ?? newVal
+  node._prevVal = newVal
 
   if (prevVal === newVal) return
 
-  if (el._raf) cancelAnimationFrame(el._raf)
+  if (node._raf) cancelAnimationFrame(node._raf)
 
   const start = performance.now()
   const diff  = newVal - prevVal
 
   function tick(now: number) {
-    const t      = Math.min((now - start) / ANIM_MS, 1)
-    const eased  = t * (2 - t)               // easeQuadOut
-    el.textContent = fmt(prevVal + diff * eased)
-    if (t < 1) el._raf = requestAnimationFrame(tick)
+    const t     = Math.min((now - start) / ANIM_MS, 1)
+    const eased = t * (2 - t)               // easeQuadOut
+    node.textContent = fmt(prevVal + diff * eased)
+    if (t < 1) node._raf = requestAnimationFrame(tick)
   }
 
-  el._raf = requestAnimationFrame(tick)
+  node._raf = requestAnimationFrame(tick)
 }
 
 // ── DOM IDs ──────────────────────────────────────────────────────────────────
