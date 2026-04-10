@@ -112,6 +112,13 @@ body {
   text-transform: uppercase;
 }
 
+.telem-est {
+  font-size: 7px;
+  letter-spacing: 0.12em;
+  color: rgba(255, 200, 80, 0.5);
+  margin-left: 4px;
+}
+
 .telem-value {
   font-family: 'Space Mono', monospace;
   font-size: 12px;

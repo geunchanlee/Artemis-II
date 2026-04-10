@@ -110,7 +110,7 @@ export function updateTelemetry(
         <span class="telem-value telem-highlight"><span id="${ID.traveled}">${Math.round(dist.traveled).toLocaleString()}</span> <span class="telem-unit">km</span></span>
       </div>
       <div class="telem-row">
-        <span class="telem-label">TOTAL MISSION</span>
+        <span class="telem-label">TOTAL MISSION <span class="telem-est">EST</span></span>
         <span class="telem-value"><span id="${ID.total}">${dist.total > 0 ? Math.round(dist.total).toLocaleString() : '—'}</span> <span class="telem-unit">km</span></span>
       </div>
       <div class="telem-row">
