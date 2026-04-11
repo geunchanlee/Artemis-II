@@ -12,7 +12,7 @@ const OUTPUT_PARAMS = {
 } as const
 
 export const TRAJECTORY_START = new Date('2026-04-02T02:00:00Z')
-export const MISSION_END      = new Date('2026-04-11T01:00:00Z')
+export const MISSION_END      = new Date('2026-04-10T23:50:00Z')  // Horizons 마지막 가용 에페메리스 시각
 
 /** 현재 위치/속도 단일 포인트를 가져온다 (30초 폴링용) */
 export async function fetchEphemeris(at: Date): Promise<Ephemeris> {

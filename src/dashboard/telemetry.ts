@@ -75,10 +75,21 @@ let initialized = false
 
 // ── Public API ────────────────────────────────────────────────────────────────
 
+const MONTH_SHORT = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC']
+
+function formatLastTelemetry(d: Date): string {
+  const mo = MONTH_SHORT[d.getUTCMonth()]
+  const dd = String(d.getUTCDate()).padStart(2, '0')
+  const hh = String(d.getUTCHours()).padStart(2, '0')
+  const mm = String(d.getUTCMinutes()).padStart(2, '0')
+  return `${mo} ${dd} · ${hh}:${mm} UTC`
+}
+
 export function updateTelemetry(
   el: HTMLElement,
   data: Ephemeris,
   dist: DistanceInfo,
+  lastTelemetry?: Date,
 ): void {
   const met      = missionElapsedTime(data.time)
   const progress = dist.total > 0 ? (dist.traveled / dist.total) * 100 : 0
@@ -110,7 +121,7 @@ export function updateTelemetry(
         <span class="telem-value telem-highlight"><span id="${ID.traveled}">${Math.round(dist.traveled).toLocaleString()}</span> <span class="telem-unit">km</span></span>
       </div>
       <div class="telem-row">
-        <span class="telem-label">TOTAL MISSION <span class="telem-est">EST</span></span>
+        <span class="telem-label">TOTAL MISSION</span>
         <span class="telem-value"><span id="${ID.total}">${dist.total > 0 ? Math.round(dist.total).toLocaleString() : '—'}</span> <span class="telem-unit">km</span></span>
       </div>
       <div class="telem-row">
@@ -120,6 +131,11 @@ export function updateTelemetry(
         </div>
         <span class="telem-value telem-small"><span id="${ID.progress}">${progress.toFixed(1)}</span>%</span>
       </div>
+      ${lastTelemetry ? `
+      <div class="telem-last-telemetry">
+        <span class="telem-last-label">LAST TELEMETRY</span>
+        <span class="telem-last-time">${formatLastTelemetry(lastTelemetry)}</span>
+      </div>` : ''}
     `
     initialized = true
     cachedMetEl = null
@@ -175,4 +191,13 @@ export function stopTimeTicker(): void {
     clearInterval(tickerId)
     tickerId = null
   }
+}
+
+/** 시간 표시를 특정 시각으로 고정한다 (미션 종료 후 사용) */
+export function freezeTimeTo(date: Date): void {
+  stopTimeTicker()
+  cachedMetEl ??= document.getElementById(MET_ID)
+  cachedUtcEl ??= document.getElementById(UTC_ID)
+  if (cachedMetEl) cachedMetEl.textContent = missionElapsedTime(date)
+  if (cachedUtcEl) cachedUtcEl.textContent = formatUTC(date)
 }

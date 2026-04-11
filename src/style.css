@@ -112,6 +112,32 @@ body {
   text-transform: uppercase;
 }
 
+.telem-last-telemetry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding: 5px 8px;
+  border: 1px solid rgba(255, 200, 80, 0.2);
+  border-radius: 3px;
+  background: rgba(255, 200, 80, 0.04);
+}
+
+.telem-last-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 7px;
+  letter-spacing: 0.15em;
+  color: rgba(255, 200, 80, 0.55);
+  text-transform: uppercase;
+}
+
+.telem-last-time {
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  color: rgba(255, 200, 80, 0.4);
+}
+
 .telem-est {
   font-size: 7px;
   letter-spacing: 0.12em;
@@ -196,6 +222,54 @@ body {
   50%       { opacity: 0.3; }
 }
 
+/* ── Orbit Markers (DOM overlay on canvas) ── */
+.orbit-marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  text-decoration: none;
+  cursor: pointer;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+.orbit-marker-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #64dcff;
+  box-shadow: 0 0 8px #64dcff, 0 0 16px rgba(100, 220, 255, 0.3);
+  animation: orbit-marker-pulse 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.orbit-marker-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: rgba(100, 220, 255, 0.65);
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-shadow: 0 0 6px rgba(100, 220, 255, 0.3);
+}
+
+.orbit-marker:hover .orbit-marker-dot {
+  background: #fff;
+  box-shadow: 0 0 12px #64dcff, 0 0 24px rgba(100, 220, 255, 0.5);
+}
+
+.orbit-marker:hover .orbit-marker-label {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+@keyframes orbit-marker-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(1.45); opacity: 0.55; }
+}
+
 /* ── Mobile Optimization (Max 850px) ── */
 @media (max-width: 850px) {
   #app {
@@ -226,5 +300,9 @@ body {
 
   .gauge-container {
     padding: 12px;
+  }
+
+  .orbit-marker-label {
+    display: none;
   }
 }

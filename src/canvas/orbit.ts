@@ -52,6 +52,7 @@ export function drawBodies(
   const currentEarthR = EARTH_R_PX * sizeRatio
   const currentMoonR = MOON_R_PX * sizeRatio
   const earthOffset = 40 * sizeRatio
+  const moonOffset  = 12 * sizeRatio
 
   // 지구 (궤도와 겹치지 않게 우상단으로 시각적 오프셋 적용)
   const ex = cx + earthOffset
@@ -92,19 +93,20 @@ export function drawBodies(
   ctx.fillStyle = earthGlow
   ctx.fill()
 
-  // 달
+  // 달 (논리 좌표 mx/my는 궤적 계산용 고정, 시각적 오프셋 vmy만 위로 이동)
   const mx = cx + Math.cos(moonAngle) * moonDist
   const my = cy - Math.sin(moonAngle) * moonDist
-  
+  const vmy = my - moonOffset
+
   if (moonImg.complete && moonImg.naturalWidth > 0) {
     ctx.save()
     ctx.beginPath()
-    ctx.arc(mx, my, currentMoonR, 0, Math.PI * 2)
+    ctx.arc(mx, vmy, currentMoonR, 0, Math.PI * 2)
     ctx.clip()
-    ctx.drawImage(moonImg, mx - currentMoonR, my - currentMoonR, currentMoonR * 2, currentMoonR * 2)
-    
+    ctx.drawImage(moonImg, mx - currentMoonR, vmy - currentMoonR, currentMoonR * 2, currentMoonR * 2)
+
     // 입체감을 위한 내부 음영 추가
-    const innerShadow = ctx.createRadialGradient(mx - 3 * sizeRatio, my - 3 * sizeRatio, 0, mx, my, currentMoonR)
+    const innerShadow = ctx.createRadialGradient(mx - 3 * sizeRatio, vmy - 3 * sizeRatio, 0, mx, vmy, currentMoonR)
     innerShadow.addColorStop(0, 'rgba(0,0,0,0)')
     innerShadow.addColorStop(0.8, 'rgba(0,0,0,0.4)')
     innerShadow.addColorStop(1, 'rgba(0,0,0,0.8)')
@@ -112,29 +114,29 @@ export function drawBodies(
     ctx.fill()
     ctx.restore()
   } else {
-    const mg = ctx.createRadialGradient(mx - 3 * sizeRatio, my - 3 * sizeRatio, 0, mx, my, currentMoonR)
+    const mg = ctx.createRadialGradient(mx - 3 * sizeRatio, vmy - 3 * sizeRatio, 0, mx, vmy, currentMoonR)
     mg.addColorStop(0, '#e8e8e8')
     mg.addColorStop(0.6, '#b0b0b0')
     mg.addColorStop(1, '#707070')
     ctx.beginPath()
-    ctx.arc(mx, my, currentMoonR, 0, Math.PI * 2)
+    ctx.arc(mx, vmy, currentMoonR, 0, Math.PI * 2)
     ctx.fillStyle = mg
     ctx.fill()
   }
 
   // 약해진 달 글로우 효과
-  const moonGlow = ctx.createRadialGradient(mx, my, currentMoonR * 0.8, mx, my, currentMoonR * 1.5)
+  const moonGlow = ctx.createRadialGradient(mx, vmy, currentMoonR * 0.8, mx, vmy, currentMoonR * 1.5)
   moonGlow.addColorStop(0, 'rgba(180,180,180,0.05)')
   moonGlow.addColorStop(1, 'rgba(180,180,180,0)')
   ctx.beginPath()
-  ctx.arc(mx, my, currentMoonR * 1.5, 0, Math.PI * 2)
+  ctx.arc(mx, vmy, currentMoonR * 1.5, 0, Math.PI * 2)
   ctx.fillStyle = moonGlow
   ctx.fill()
 
   ctx.fillStyle = 'rgba(255,255,255,0.95)'
   ctx.font = '12px "Space Mono", monospace'
   ctx.textAlign = 'center'
-  ctx.fillText('MOON', mx, my - currentMoonR - 6)
+  ctx.fillText('MOON', mx, vmy - currentMoonR - 6)
   ctx.fillText('EARTH', ex, ey - currentEarthR - 6)
 }
 

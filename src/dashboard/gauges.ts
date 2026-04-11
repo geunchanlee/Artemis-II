@@ -107,9 +107,11 @@ export function initGauges(container: HTMLElement): void {
 }
 
 export function setGaugeMax(key: keyof typeof GAUGES, max: number): void {
-  if (GAUGES[key]) {
-    GAUGES[key].max = max
-  }
+  if (GAUGES[key]) GAUGES[key].max = max
+}
+
+export function setGaugeMin(key: keyof typeof GAUGES, min: number): void {
+  if (GAUGES[key]) GAUGES[key].min = min
 }
 
 export function updateGauges(values: {

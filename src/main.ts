@@ -2,8 +2,8 @@ import './style.css'
 import { inject } from '@vercel/analytics'
 import { generateStars, drawStars } from './canvas/background'
 import { makeScene, updateMoonAngle, drawBodies, drawTraveledOrbit, drawSpacecraft } from './canvas/orbit'
-import { initGauges, updateGauges, setGaugeMax } from './dashboard/gauges'
-import { updateTelemetry, startTimeTicker, stopTimeTicker } from './dashboard/telemetry'
+import { initGauges, updateGauges, setGaugeMax, setGaugeMin } from './dashboard/gauges'
+import { updateTelemetry, startTimeTicker, freezeTimeTo } from './dashboard/telemetry'
 import { fetchEphemeris, fetchFullTrajectory, TRAJECTORY_START, MISSION_END, getMoonAngle } from './horizons'
 import type { Ephemeris, TrajectoryPoint } from './types'
 
@@ -57,6 +57,34 @@ const ctx        = canvas.getContext('2d')!
 const statusDot  = document.getElementById('status-dot')!
 const statusText = document.getElementById('status-text')!
 
+// ─── 궤도 마커 (DOM 오버레이) ─────────────────────────────────────────────────
+const flybyMarker = document.createElement('a')
+flybyMarker.href = 'https://www.nasa.gov/gallery/lunar-flyby/'
+flybyMarker.target = '_blank'
+flybyMarker.rel = 'noopener noreferrer'
+flybyMarker.className = 'orbit-marker'
+flybyMarker.style.display = 'none'
+flybyMarker.innerHTML = `<span class="orbit-marker-dot"></span><span class="orbit-marker-label">LUNAR FLYBY</span>`
+document.getElementById('canvas-wrap')!.appendChild(flybyMarker)
+
+let flybyPoint: { x: number; y: number } | null = null
+
+function updateMarkerPositions(): void {
+  if (!flybyPoint) return
+  const sx = scene.cx + flybyPoint.x * scene.scale
+  const sy = scene.cy - flybyPoint.y * scene.scale
+  // 달 중심에서 마커 방향 단위벡터로 7px 밀어 궤도 선 위에 정렬
+  const MOON_X_ROT = 384_400
+  const dx = flybyPoint.x - MOON_X_ROT, dy = flybyPoint.y
+  const dist = Math.hypot(dx, dy)
+  const nudge = 3
+  const nx = dist > 0 ? (dx / dist) * nudge : 0
+  const ny = dist > 0 ? (dy / dist) * nudge : 0
+  flybyMarker.style.left = `${sx + nx}px`
+  flybyMarker.style.top  = `${sy - ny}px`
+  flybyMarker.style.display = ''
+}
+
 initGauges(document.getElementById('gauges')!)
 
 // ─── 크기 조정 ────────────────────────────────────────────────────────────────
@@ -68,6 +96,7 @@ function resize(): void {
   canvas.height = wrap.clientHeight
   generateStars(canvas.width, canvas.height)
   scene = makeScene(canvas.width, canvas.height)
+  updateMarkerPositions()
 }
 
 window.addEventListener('resize', resize)
@@ -83,7 +112,7 @@ let fullTrajectory: TrajectoryPoint[] = []
 let traveledPoints: Array<{ x: number; y: number; d?: number; v?: number }> = []
 
 let traveledKm = 0
-let totalKm    = 0
+let totalKm    = 1100000  // 아르테미스 2호 전체 미션 왕복 거리 추정치 고정
 
 // ─── 궤적 분리 & 거리 계산 ────────────────────────────────────────────────────
 
@@ -149,14 +178,17 @@ async function loadFullTrajectory(): Promise<void> {
 
   // 최고 속도를 속도 게이지의 최대값(100%)으로 설정
   if (maxSpeed > 0) {
-    // 여유를 위해 소수점 첫째 자리에서 올림
     setGaugeMax('speed', Math.ceil(maxSpeed * 10) / 10)
   }
 
-  // 아르테미스 2호 전체 미션 왕복 거리 추정치 1,100,000km로 고정
-  totalKm = 1100000
+  // 실제 총 이동 거리(마지막 포인트 누적값)를 미션 거리로 사용
+  totalKm = Math.round(fullTrajectory[fullTrajectory.length - 1].d ?? 0)
 
   // 달의 위치를 고정하기 위해 지구-달 회전 좌표계로 변환 (Moon at Angle 0)
+  // 변환 후 지구/달 최대 거리를 계산하여 게이지 스케일 설정
+  const MOON_ORBITAL_RADIUS = 384400 // km (근사값)
+  let maxDistEarth = 0
+  let maxDistMoon  = 0
   fullTrajectory.forEach(pt => {
     const angle = getMoonAngle(pt.t)
     const cos = Math.cos(-angle)
@@ -165,7 +197,29 @@ async function loadFullTrajectory(): Promise<void> {
     const ry = pt.x * sin + pt.y * cos
     pt.x = rx
     pt.y = ry
+
+    const dE = Math.hypot(pt.x, pt.y, pt.z)
+    const dM = Math.hypot(pt.x - MOON_ORBITAL_RADIUS, pt.y, pt.z)
+    if (dE > maxDistEarth) maxDistEarth = dE
+    if (dM > maxDistMoon)  maxDistMoon  = dM
   })
+
+  // 게이지 최대값을 실제 미션 최대 거리에 맞춰 설정 (1,000 km 단위 올림)
+  if (maxDistEarth > 0) setGaugeMax('distEarth', Math.ceil(maxDistEarth / 1000) * 1000)
+  if (maxDistMoon  > 0) setGaugeMax('distMoon',  Math.ceil(maxDistMoon  / 1000) * 1000)
+  setGaugeMin('distEarth', 0)
+
+  // 루나 플라이바이 포인트 탐색: 회전 좌표계에서 달(384,400, 0)에 가장 가까운 점
+  const MOON_X_ROT = 384_400
+  let flybyIdx = 0, minDist2 = Infinity
+  for (let i = 0; i < fullTrajectory.length; i++) {
+    const dx = fullTrajectory[i].x - MOON_X_ROT
+    const dy = fullTrajectory[i].y
+    const d2 = dx * dx + dy * dy
+    if (d2 < minDist2) { minDist2 = d2; flybyIdx = i }
+  }
+  flybyPoint = fullTrajectory[flybyIdx]
+  updateMarkerPositions()
 
   splitTrajectory(Date.now())
 }
@@ -175,9 +229,63 @@ async function loadFullTrajectory(): Promise<void> {
 async function pollTelemetry(): Promise<void> {
   // 미션 종료 여부 확인 (30초마다 1번씩만 체크하여 성능 부하 최소화)
   if (Date.now() > MISSION_END.getTime()) {
-    stopTimeTicker()
     statusDot.className = 'complete'
     statusText.textContent = 'MISSION COMPLETE'
+
+    // 최종 데이터가 아직 없으면 한 번만 fetch/구성하여 고정 표시
+    if (!ephemeris) {
+      let finalData: import('./types').Ephemeris | null = null
+
+      try {
+        // 1차: NASA API에서 MISSION_END 시각 데이터 fetch
+        const data = await fetchEphemeris(MISSION_END)
+        const angle = getMoonAngle(MISSION_END.getTime())
+        const cos = Math.cos(-angle)
+        const sin = Math.sin(-angle)
+        const rx = data.position.x * cos - data.position.y * sin
+        const ry = data.position.x * sin + data.position.y * cos
+        data.position.x = rx
+        data.position.y = ry
+        finalData = data
+      } catch (e) {
+        console.warn('[Artemis] Final API fetch failed, falling back to trajectory data:', e)
+        // 2차: fullTrajectory 마지막 포인트로 Ephemeris 구성 (이미 회전 좌표계)
+        if (fullTrajectory.length > 0) {
+          const pt = fullTrajectory[fullTrajectory.length - 1]
+          const MOON_ORBITAL_RADIUS = 384400 // km (근사값)
+          finalData = {
+            time: new Date(pt.t),
+            position: { x: pt.x, y: pt.y, z: pt.z },
+            velocity: { x: 0, y: 0, z: 0 },
+            distanceFromEarth: Math.hypot(pt.x, pt.y, pt.z),
+            distanceFromMoon:  Math.hypot(pt.x - MOON_ORBITAL_RADIUS, pt.y, pt.z),
+            speed: pt.v ?? 0,
+          }
+        }
+      }
+
+      if (finalData) {
+        // 미션 종료 = 지구 귀환 완료 → 지구와의 거리를 지구 반지름(착수)으로 고정
+        const lastTelemetryTime = new Date(finalData.time)
+        finalData.distanceFromEarth = 6371
+
+        ephemeris = finalData
+        splitTrajectory(finalData.time.getTime())
+        updateGauges({
+          speed:     finalData.speed,
+          distEarth: finalData.distanceFromEarth,
+          distMoon:  finalData.distanceFromMoon,
+        })
+        updateTelemetry(
+          document.getElementById('telemetry')!,
+          finalData,
+          { traveled: traveledKm, total: totalKm },
+          lastTelemetryTime,
+        )
+      }
+    }
+
+    freezeTimeTo(MISSION_END)
     return
   }
 
