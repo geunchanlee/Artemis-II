@@ -5,6 +5,8 @@
 
 [**한국어 (Korean)**](./README.ko.md) | **English**
 
+**[Live Demo → https://artemis-ii-kappa.vercel.app/](https://artemis-ii-kappa.vercel.app/)**
+
 ---
 
 ## 🌌 Overview
@@ -18,7 +20,7 @@ A real-time, interactive web dashboard tracking the orbital trajectory of NASA's
 *   **Vercel Edge Proxy:** Bypasses CORS restrictions seamlessly using a Vercel Edge Function proxy for the NASA API.
 
 ### 🛠️ Tech Stack
-*   **Frontend:** TypeScript, Vite, HTML5 Canvas API, Vanilla CSS
+*   **Frontend:** TypeScript, Vite, HTML5 Canvas API, D3.js, Vanilla CSS
 *   **Data Source:** NASA JPL Horizons REST API
 *   **Deployment & Analytics:** Vercel, Vercel Web Analytics
 *   **AI Development:** Claude Code, Gemini CLI
